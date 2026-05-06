@@ -63,3 +63,20 @@ This repo now uses a root `index.html` and explicit `vercel.json` routes so `/` 
 Vercel detected `pyproject.toml` and attempted a Python package build. With a flat repo layout containing top-level folders like `api/`, `public/`, and `ball_line_detector/`, setuptools package auto-discovery can fail with: `Multiple top-level packages discovered in a flat-layout`.
 
 This is now fixed by explicitly telling setuptools to only package `ball_line_detector*` and exclude non-package folders.
+
+
+## Exact steps to deploy on Vercel (FastAPI entrypoint fix)
+1. Push this code to your GitHub repo (it now includes `api/main.py` with a top-level `app = FastAPI(...)`).
+2. In Vercel, open your project settings and make sure the **Root Directory** points to this repo folder.
+3. In Vercel, go to **Deployments** and click **Redeploy** on the latest commit (or push a new commit).
+4. After deploy completes, open `https://<your-project>.vercel.app/` and confirm the UI loads.
+5. Verify health endpoint in browser: `https://<your-project>.vercel.app/api/judge` (should return JSON status).
+6. Test judge endpoint with POST (for example from Postman/curl):
+   ```bash
+   curl -X POST https://<your-project>.vercel.app/api/judge \
+     -H "content-type: application/json" \
+     -d '{"sport":"table_tennis","x":50,"y":50,"r":8,"lines":[{"x1":40,"y1":40,"x2":40,"y2":100}]}'
+   ```
+
+If you still see the old error, clear Vercel build cache and redeploy:
+- Project -> Settings -> Functions -> (or Deployments page) -> **Redeploy with existing Build Cache disabled**.

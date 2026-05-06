@@ -1,11 +1,11 @@
 {
   "version": 2,
   "builds": [
-    { "src": "api/judge.py", "use": "@vercel/python" },
+    { "src": "api/main.py", "use": "@vercel/python" },
     { "src": "index.html", "use": "@vercel/static" }
   ],
   "routes": [
-    { "src": "/api/judge", "dest": "api/judge.py" },
+    { "src": "/api/judge", "dest": "api/main.py" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
