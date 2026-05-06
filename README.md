@@ -40,3 +40,19 @@ POST `/judge` payload:
 4. **Decision layer**: this repository's geometry + sport-specific rules.
 5. **Review layer**: confidence thresholds, replay clip, manual override UI.
 6. **Audit layer**: persist frame evidence, hashes, and decision logs.
+
+
+## Deploy to Vercel
+
+This repository now includes a static UI (`public/index.html`) and a Vercel Python Serverless Function (`api/judge.py`).
+
+- `/` serves the UI.
+- `POST /api/judge` evaluates the line decision.
+- `GET /api/judge` returns health JSON.
+
+If your prior deployment showed nothing, it was because there was no static page or Vercel routing config.
+
+
+### Vercel visibility fix
+
+This repo now uses a root `index.html` and explicit `vercel.json` routes so `/` always renders a page and `/api/judge` resolves to the Python function.
