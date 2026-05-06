@@ -16,3 +16,8 @@ ball-line-detector = "ball_line_detector.cli:main"
 [build-system]
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
+
+
+[tool.setuptools.packages.find]
+include = ["ball_line_detector*"]
+exclude = ["api*", "public*", "tests*"]

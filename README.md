@@ -56,3 +56,10 @@ If your prior deployment showed nothing, it was because there was no static page
 ### Vercel visibility fix
 
 This repo now uses a root `index.html` and explicit `vercel.json` routes so `/` always renders a page and `/api/judge` resolves to the Python function.
+
+
+### Why the Vercel build failed (setuptools error)
+
+Vercel detected `pyproject.toml` and attempted a Python package build. With a flat repo layout containing top-level folders like `api/`, `public/`, and `ball_line_detector/`, setuptools package auto-discovery can fail with: `Multiple top-level packages discovered in a flat-layout`.
+
+This is now fixed by explicitly telling setuptools to only package `ball_line_detector*` and exclude non-package folders.
