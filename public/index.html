@@ -5,34 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FairCall Ball Line Judge</title>
     <style>
-      body { font-family: Arial, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+      body { font-family: Arial, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; }
       .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .8rem; }
-      input, select, button, textarea { padding: .5rem; width: 100%; }
-      pre { background: #111; color: #0f0; padding: 1rem; overflow: auto; }
+      input, select, button { padding: .5rem; width: 100%; }
+      button { cursor: pointer; font-weight: 600; }
+      pre { background: #101418; color: #99ff99; padding: 1rem; border-radius: 8px; overflow: auto; }
+      video { width: 100%; max-height: 360px; background: #000; border-radius: 8px; margin-top: .8rem; }
+      .note { font-size: .9rem; color: #444; }
     </style>
   </head>
   <body>
     <h1>FairCall Ball Line Judge</h1>
-    <p>If your app was "not showing" on Vercel, it was because there was no frontend entry page. This page fixes that.</p>
+    <p>✅ This page is deployed at <code>/</code> so Vercel always shows a visible app.</p>
+
     <div class="grid">
-      <label>Sport<select id="sport"><option>table_tennis</option><option>badminton</option><option>basketball</option><option>tennis</option></select></label>
+      <label>Sport
+        <select id="sport"><option>table_tennis</option><option>badminton</option><option>basketball</option><option>tennis</option></select>
+      </label>
       <label>Ball radius (mm)<input id="r_mm" type="number" value="10" /></label>
-      <label>Ball X<input id="x" type="number" value="100" /></label>
-      <label>Ball Y<input id="y" type="number" value="100" /></label>
     </div>
-    <label>Lines JSON</label>
-    <textarea id="lines" rows="5">[{"x1":120,"y1":0,"x2":120,"y2":300}]</textarea>
+
+    <h3>Camera</h3>
+    <button id="startCam">Start Camera</button>
+    <video id="camera" autoplay playsinline muted></video>
+    <p class="note">This camera preview is for live capture workflow. Ball center and court lines are auto-filled with placeholder values until vision tracking is connected.</p>
+
     <button id="submit">Judge</button>
-    <pre id="result">Result will appear here</pre>
+    <pre id="result">Result will appear here...</pre>
 
     <script>
+      const camera = document.getElementById('camera');
+      document.getElementById('startCam').onclick = async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          camera.srcObject = stream;
+        } catch (err) {
+          document.getElementById('result').textContent = `Camera error: ${err.message}`;
+        }
+      };
+
       document.getElementById('submit').onclick = async () => {
         const payload = {
           sport: document.getElementById('sport').value,
-          x: Number(document.getElementById('x').value),
-          y: Number(document.getElementById('y').value),
           r_mm: Number(document.getElementById('r_mm').value),
-          lines: JSON.parse(document.getElementById('lines').value)
+          x: 100,
+          y: 100,
+          lines: [{ x1: 120, y1: 0, x2: 120, y2: 300 }]
         };
         const res = await fetch('/api/judge', {
           method: 'POST',
@@ -40,7 +58,7 @@
           body: JSON.stringify(payload)
         });
         document.getElementById('result').textContent = JSON.stringify(await res.json(), null, 2);
-      }
+      };
     </script>
   </body>
 </html>
