@@ -11,8 +11,8 @@ from .models import LineSegment, SPORT_CONFIGS, SportName
 class DetectionResult:
     sport: SportName
     ball_center: Tuple[int, int]
-    ball_radius_px: int
-    min_distance_px: float
+    ball_radius_mm: int
+    min_distance_mm: float
     touched_line: bool
     decision: str
     confidence: float
@@ -24,12 +24,12 @@ class MultiSportLineJudge:
             raise ValueError(f"Unknown sport {sport}")
         self.config = SPORT_CONFIGS[sport]
 
-    def judge_from_tracking(self, ball_center: Tuple[int, int], ball_radius_px: int, lines: Iterable[LineSegment]) -> DetectionResult:
+    def judge_from_tracking(self, ball_center: Tuple[int, int], ball_radius_mm: int, lines: Iterable[LineSegment]) -> DetectionResult:
         min_dist = min(self._distance_to_segment(ball_center, line) for line in lines)
-        touched = min_dist <= (ball_radius_px + self.config.perspective_margin_px)
+        touched = min_dist <= (ball_radius_mm + self.config.perspective_margin_mm)
         decision = ("IN" if touched else "OUT") if self.config.in_rule == "touch_is_in" else ("OUT" if touched else "IN")
-        confidence = float(max(0.0, min(1.0, 1 - abs(min_dist - ball_radius_px) / max(ball_radius_px, 1))))
-        return DetectionResult(self.config.name, ball_center, ball_radius_px, min_dist, touched, decision, confidence)
+        confidence = float(max(0.0, min(1.0, 1 - abs(min_dist - ball_radius_mm) / max(ball_radius_mm, 1))))
+        return DetectionResult(self.config.name, ball_center, ball_radius_mm, min_dist, touched, decision, confidence)
 
     @staticmethod
     def _distance_to_segment(point: Tuple[int, int], line: LineSegment) -> float:

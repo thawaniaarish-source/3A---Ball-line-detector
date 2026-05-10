@@ -18,7 +18,7 @@ class JudgePayload(BaseModel):
     sport: str
     x: int
     y: int
-    r: int
+    r_mm: int
     lines: list[LinePayload]
 
 
@@ -36,7 +36,7 @@ def judge(payload: JudgePayload) -> dict:
         lines = [LineSegment((line.x1, line.y1), (line.x2, line.y2)) for line in payload.lines]
         result = MultiSportLineJudge(payload.sport).judge_from_tracking(
             ball_center=(payload.x, payload.y),
-            ball_radius_px=payload.r,
+            ball_radius_mm=payload.r_mm,
             lines=lines,
         )
         return result.__dict__

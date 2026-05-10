@@ -14,7 +14,7 @@ A modular app that decides whether a ball has touched the line (or stayed clear)
 python -m venv .venv && source .venv/bin/activate
 pip install -e .
 pytest
-ball-line-detector --sport table_tennis --x 50 --y 50 --r 8 --line 40,40,40,100
+ball-line-detector --sport table_tennis --x 50 --y 50 --r-mm 8 --line 40,40,40,100
 ```
 
 ## Run API
@@ -28,7 +28,7 @@ POST `/judge` payload:
   "sport": "badminton",
   "x": 320,
   "y": 240,
-  "r": 14,
+  "r_mm": 14,
   "lines": [{"x1": 300, "y1": 50, "x2": 300, "y2": 420}]
 }
 ```
@@ -75,7 +75,7 @@ This is now fixed by explicitly telling setuptools to only package `ball_line_de
    ```bash
    curl -X POST https://<your-project>.vercel.app/api/judge \
      -H "content-type: application/json" \
-     -d '{"sport":"table_tennis","x":50,"y":50,"r":8,"lines":[{"x1":40,"y1":40,"x2":40,"y2":100}]}'
+     -d '{"sport":"table_tennis","x":50,"y":50,"r_mm":8,"lines":[{"x1":40,"y1":40,"x2":40,"y2":100}]}'
    ```
 
 If you still see the old error, clear Vercel build cache and redeploy:

@@ -10,7 +10,7 @@ class SportConfig:
     real_ball_diameter_m: float
     line_width_m: float
     in_rule: Literal["touch_is_in", "touch_is_out"]
-    perspective_margin_px: int
+    perspective_margin_mm: int
 
 
 SPORT_CONFIGS: dict[SportName, SportConfig] = {

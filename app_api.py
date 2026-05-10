@@ -16,7 +16,7 @@ class JudgeRequest(BaseModel):
     sport: SportName
     x: int
     y: int
-    r: int
+    r_mm: int
     lines: list[LineIn]
 
 
@@ -33,7 +33,7 @@ def judge(req: JudgeRequest) -> dict:
     judge_engine = MultiSportLineJudge(req.sport)
     result = judge_engine.judge_from_tracking(
         ball_center=(req.x, req.y),
-        ball_radius_px=req.r,
+        ball_radius_mm=req.r_mm,
         lines=[LineSegment((l.x1, l.y1), (l.x2, l.y2)) for l in req.lines],
     )
     return result.__dict__

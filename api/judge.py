@@ -14,7 +14,7 @@ def health():
 @app.route("/api/judge", methods=["POST"])
 def judge():
     payload = request.get_json(silent=True) or {}
-    required = ["sport", "x", "y", "r", "lines"]
+    required = ["sport", "x", "y", "r_mm", "lines"]
     missing = [field for field in required if field not in payload]
     if missing:
         return jsonify({"error": f"Missing field(s): {', '.join(missing)}"}), 400
@@ -29,7 +29,7 @@ def judge():
 
         result = MultiSportLineJudge(payload["sport"]).judge_from_tracking(
             ball_center=(int(payload["x"]), int(payload["y"])),
-            ball_radius_px=int(payload["r"]),
+            ball_radius_mm=int(payload["r_mm"]),
             lines=lines,
         )
         return jsonify(result.__dict__), 200

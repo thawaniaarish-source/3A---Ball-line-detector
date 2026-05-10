@@ -16,7 +16,7 @@
     <p>If your app was "not showing" on Vercel, it was because there was no frontend entry page. This page fixes that.</p>
     <div class="grid">
       <label>Sport<select id="sport"><option>table_tennis</option><option>badminton</option><option>basketball</option><option>tennis</option></select></label>
-      <label>Ball radius(px)<input id="r" type="number" value="10" /></label>
+      <label>Ball radius (mm)<input id="r_mm" type="number" value="10" /></label>
       <label>Ball X<input id="x" type="number" value="100" /></label>
       <label>Ball Y<input id="y" type="number" value="100" /></label>
     </div>
@@ -31,7 +31,7 @@
           sport: document.getElementById('sport').value,
           x: Number(document.getElementById('x').value),
           y: Number(document.getElementById('y').value),
-          r: Number(document.getElementById('r').value),
+          r_mm: Number(document.getElementById('r_mm').value),
           lines: JSON.parse(document.getElementById('lines').value)
         };
         const res = await fetch('/api/judge', {
