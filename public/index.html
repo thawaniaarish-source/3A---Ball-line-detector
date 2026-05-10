@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FairCall Ball Line Judge</title>
+    <style>
+      body { font-family: Arial, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+      .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .8rem; }
+      input, select, button, textarea { padding: .5rem; width: 100%; }
+      pre { background: #111; color: #0f0; padding: 1rem; overflow: auto; }
+    </style>
+  </head>
+  <body>
+    <h1>FairCall Ball Line Judge</h1>
+    <p>If your app was "not showing" on Vercel, it was because there was no frontend entry page. This page fixes that.</p>
+    <div class="grid">
+      <label>Sport<select id="sport"><option>table_tennis</option><option>badminton</option><option>basketball</option><option>tennis</option></select></label>
+      <label>Ball radius (mm)<input id="r_mm" type="number" value="10" /></label>
+      <label>Ball X<input id="x" type="number" value="100" /></label>
+      <label>Ball Y<input id="y" type="number" value="100" /></label>
+    </div>
+    <label>Lines JSON</label>
+    <textarea id="lines" rows="5">[{"x1":120,"y1":0,"x2":120,"y2":300}]</textarea>
+    <button id="submit">Judge</button>
+    <pre id="result">Result will appear here</pre>
+
+    <script>
+      document.getElementById('submit').onclick = async () => {
+        const payload = {
+          sport: document.getElementById('sport').value,
+          x: Number(document.getElementById('x').value),
+          y: Number(document.getElementById('y').value),
+          r_mm: Number(document.getElementById('r_mm').value),
+          lines: JSON.parse(document.getElementById('lines').value)
+        };
+        const res = await fetch('/api/judge', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+        document.getElementById('result').textContent = JSON.stringify(await res.json(), null, 2);
+      }
+    </script>
+  </body>
+</html>
