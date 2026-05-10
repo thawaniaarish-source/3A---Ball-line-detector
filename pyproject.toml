@@ -1,0 +1,23 @@
+[project]
+name = "ball-line-detector"
+version = "0.1.0"
+description = "Multi-sport ball line hit detector from camera/video frames"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+vision = ["opencv-python>=4.9"]
+api = ["fastapi>=0.115", "uvicorn>=0.30", "pydantic>=2.7"]
+
+[project.scripts]
+ball-line-detector = "ball_line_detector.cli:main"
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+[tool.setuptools.packages.find]
+include = ["ball_line_detector*"]
+exclude = ["api*", "public*", "tests*"]
