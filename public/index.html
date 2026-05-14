@@ -6,27 +6,21 @@
     <title>FairCall Pro | Multi-Sport Line Detector</title>
     <style>
       body { font-family: Inter, Arial, sans-serif; background: #f4f7fb; margin: 0; color: #0f172a; }
-      .shell { max-width: 1100px; margin: 1.4rem auto; padding: 1rem; }
-      .hero { background: #fff; border-radius: 14px; padding: 1rem 1.2rem; box-shadow: 0 8px 30px rgba(2,6,23,.08); }
-      .hero img { height: 56px; }
-      .layout { display: grid; grid-template-columns: 340px 1fr; gap: 1rem; margin-top: 1rem; }
-      .card { background: #fff; border-radius: 14px; padding: 1rem; box-shadow: 0 8px 30px rgba(2,6,23,.08); }
-      label { display:block; font-size:.92rem; margin-bottom:.65rem; }
-      input, select, button { width: 100%; padding:.55rem; margin-top:.25rem; border-radius:10px; border:1px solid #cbd5e1; }
-      button { background: #1d4ed8; color:#fff; border:none; font-weight:700; cursor:pointer; }
-      button.secondary { background:#334155; }
-      .row { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; }
-      video, canvas { width:100%; border-radius:12px; background:#020617; }
-      pre { margin-top:.7rem; background:#0b1220; color:#93f59d; padding: .8rem; border-radius: 10px; min-height: 150px; overflow:auto; }
-      .small { font-size:.8rem; color:#334155; }
+      .shell { max-width: 1050px; margin: 1.4rem auto; padding: 1rem; }
+      .hero,.card{background:#fff;border-radius:14px;padding:1rem;box-shadow:0 8px 30px rgba(2,6,23,.08)}
+      .hero img{height:56px}.layout{display:grid;grid-template-columns:320px 1fr;gap:1rem;margin-top:1rem}
+      label{display:block;margin-bottom:.7rem} input,select,button{width:100%;padding:.6rem;border-radius:10px;border:1px solid #cbd5e1}
+      button{background:#1d4ed8;color:#fff;font-weight:700;border:none;cursor:pointer}
+      video{width:100%;border-radius:12px;background:#000} pre{background:#0b1220;color:#93f59d;padding:.8rem;border-radius:10px;min-height:120px}
+      .small{font-size:.84rem;color:#475569} details{margin-top:.5rem}
     </style>
   </head>
   <body>
     <div class="shell">
       <section class="hero">
         <img src="/assets/bmw-m-design.svg" alt="BMW M design" />
-        <h1>FairCall Pro: AI-assisted Ball Line Detector</h1>
-        <p class="small">Capture a live frame, click ball center, add one or more court lines, and run a multi-sport decision engine for table tennis, badminton, basketball, and tennis.</p>
+        <h1>FairCall Pro</h1>
+        <p class="small">Simple mode: start camera and click <b>Judge Current Frame</b>. Advanced marking is optional.</p>
       </section>
 
       <section class="layout">
@@ -35,49 +29,27 @@
             <select id="sport"><option>table_tennis</option><option>badminton</option><option>basketball</option><option>tennis</option></select>
           </label>
           <label>Ball Radius (mm)<input id="r_mm" type="number" value="10" min="1" /></label>
-          <div class="row">
-            <button id="startCam">Start Camera</button>
-            <button class="secondary" id="capture">Capture Frame</button>
-          </div>
-          <div class="row" style="margin-top:.5rem;">
-            <button class="secondary" id="markBall">Mark Ball Center</button>
-            <button class="secondary" id="markLine">Mark Line Segment</button>
-          </div>
-          <button id="submit" style="margin-top:.5rem;">Run Line Decision</button>
-          <p class="small">Line mode uses two clicks per segment. Add multiple segments for complex courts.</p>
+          <button id="startCam">Start Camera</button>
+          <button id="judge" style="margin-top:.5rem;">Judge Current Frame</button>
+
+          <details>
+            <summary>Advanced (optional): manual coordinates</summary>
+            <label>Ball center X<input id="x" type="number" placeholder="auto center"/></label>
+            <label>Ball center Y<input id="y" type="number" placeholder="auto center"/></label>
+            <label>Line x1,y1,x2,y2<input id="line" value="120,0,120,300"/></label>
+          </details>
+
           <pre id="result">Result will appear here...</pre>
         </div>
 
-        <div class="card">
-          <video id="camera" autoplay playsinline muted></video>
-          <canvas id="overlay" width="960" height="540"></canvas>
-        </div>
+        <div class="card"><video id="camera" autoplay playsinline muted></video></div>
       </section>
     </div>
-
     <script>
       const camera = document.getElementById('camera');
-      const canvas = document.getElementById('overlay');
-      const ctx = canvas.getContext('2d');
-      const state = { mode: null, ball: null, lines: [], pendingLinePoint: null };
-
-      function draw() {
-        if (camera.videoWidth) {
-          canvas.width = camera.videoWidth;
-          canvas.height = camera.videoHeight;
-        }
-        ctx.drawImage(camera, 0, 0, canvas.width, canvas.height);
-        if (state.ball) {
-          ctx.fillStyle = '#facc15';
-          ctx.beginPath(); ctx.arc(state.ball.x, state.ball.y, 7, 0, Math.PI*2); ctx.fill();
-        }
-        ctx.strokeStyle = '#22d3ee'; ctx.lineWidth = 3;
-        state.lines.forEach(line => { ctx.beginPath(); ctx.moveTo(line.x1, line.y1); ctx.lineTo(line.x2, line.y2); ctx.stroke(); });
-      }
-
       document.getElementById('startCam').onclick = async () => {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-        camera.srcObject = stream;
+        try { camera.srcObject = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }); }
+        catch (e) { document.getElementById('result').textContent = `Camera error: ${e.message}`; }
       };
       document.getElementById('capture').onclick = () => draw();
       document.getElementById('markBall').onclick = () => state.mode = 'ball';
@@ -99,18 +71,12 @@
         draw();
       });
 
-      document.getElementById('submit').onclick = async () => {
-        if (!state.ball || state.lines.length === 0) {
-          document.getElementById('result').textContent = 'Please capture frame, mark the ball center, and add at least one line segment.';
-          return;
-        }
-        const payload = {
-          sport: document.getElementById('sport').value,
-          r_mm: Number(document.getElementById('r_mm').value),
-          x: state.ball.x,
-          y: state.ball.y,
-          lines: state.lines
-        };
+      document.getElementById('judge').onclick = async () => {
+        const vw = camera.videoWidth || 640, vh = camera.videoHeight || 360;
+        const x = Number(document.getElementById('x').value || Math.round(vw * 0.5));
+        const y = Number(document.getElementById('y').value || Math.round(vh * 0.5));
+        const [x1,y1,x2,y2] = document.getElementById('line').value.split(',').map(n => Number(n.trim()));
+        const payload = { sport: sport.value, r_mm: Number(r_mm.value), x, y, lines: [{x1,y1,x2,y2}] };
         const res = await fetch('/api/judge', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
         document.getElementById('result').textContent = JSON.stringify(await res.json(), null, 2);
       };
