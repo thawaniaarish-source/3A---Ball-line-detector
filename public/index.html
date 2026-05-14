@@ -31,7 +31,7 @@
         <p class="desc">BMW M-inspired style. Start camera and run Judge Results.</p>
         <img src="/assets/bmw-m-design.svg" alt="BMW M design" style="height:60px;margin-bottom:16px;">
         <div class="panel">
-          <label>Sport<select id="sport"><option>table_tennis</option><option>badminton</option><option>basketball</option><option>tennis</option></select></label>
+          <label>Sport<select id="sport"><option>table_tennis</option><option>badminton</option><option>basketball</option><option>tennis</option><option>volleyball</option><option>soccer</option><option>baseball</option><option>pickleball</option><option>squash</option></select></label>
           <label>Ball Radius (mm)<input id="r_mm" type="number" value="10" min="1" /></label>
           <button id="startCam">Start Camera</button>
           <button id="judge" class="primary" style="margin-top:8px;">Judge Results</button>
@@ -48,6 +48,7 @@
 <script>
 const camera = document.getElementById('camera');
 const warning = document.getElementById('warning');
+const sportMap = { volleyball: 'basketball', soccer: 'basketball', baseball: 'tennis', pickleball: 'table_tennis', squash: 'badminton' };
 
 document.getElementById('startCam').onclick = async () => {
   warning.style.display = 'none';
@@ -57,8 +58,10 @@ document.getElementById('startCam').onclick = async () => {
 
 document.getElementById('judge').onclick = async () => {
   const vw = camera.videoWidth || 640, vh = camera.videoHeight || 360;
+  const selectedSport = sport.value;
+  const apiSport = sportMap[selectedSport] || selectedSport;
   const payload = {
-    sport: sport.value,
+    sport: apiSport,
     r_mm: Number(r_mm.value),
     x: Math.round(vw * 0.5),
     y: Math.round(vh * 0.5),
@@ -66,7 +69,8 @@ document.getElementById('judge').onclick = async () => {
   };
   const res = await fetch('/api/judge', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
   const data = await res.json();
-  document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+  const extra = apiSport !== selectedSport ? { note: `Mapped ${selectedSport} to ${apiSport} decision profile.` } : {};
+  document.getElementById('result').textContent = JSON.stringify({ ...extra, ...data }, null, 2);
   if (!data.touched_line) warning.style.display = 'block'; else warning.style.display = 'none';
 };
 </script>
