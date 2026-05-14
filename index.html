@@ -1,64 +1,83 @@
 <!doctype html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FairCall Ball Line Judge</title>
-    <style>
-      body { font-family: Arial, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; }
-      .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .8rem; }
-      input, select, button { padding: .5rem; width: 100%; }
-      button { cursor: pointer; font-weight: 600; }
-      pre { background: #101418; color: #99ff99; padding: 1rem; border-radius: 8px; overflow: auto; }
-      video { width: 100%; max-height: 360px; background: #000; border-radius: 8px; margin-top: .8rem; }
-      .note { font-size: .9rem; color: #444; }
-    </style>
-  </head>
-  <body>
-    <h1>FairCall Ball Line Judge</h1>
-    <p>✅ This page is deployed at <code>/</code> so Vercel always shows a visible app.</p>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FairCall Pro | BMW M Style</title>
+  <style>
+    :root{--bg:#040507;--panel:#0d1117;--text:#f8fafc;--muted:#a8b0bb;--blue:#1f84d6;--blue2:#2d6fe8;--red:#ff3b30}
+    *{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 75% 20%,#101a2b 0,#050608 45%);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
+    .nav{display:flex;justify-content:space-between;align-items:center;padding:16px 40px;border-bottom:1px solid #1b222d;background:rgba(4,5,7,.82);backdrop-filter:blur(8px);position:sticky;top:0;z-index:4}
+    .brandLogo{height:56px;width:auto;display:block}.tag{border:1px solid #e2e8f0;padding:10px 18px;font-weight:700;letter-spacing:1px}
+    .stripe{height:5px;background:linear-gradient(90deg,#1f84d6 0 32%,#2d6fe8 32% 67%,#ff3b30 67%)}
+    .wrap{padding:34px 40px;max-width:1400px;margin:0 auto}.hero{display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:start}
+    h1{font-size:clamp(2.6rem,6vw,5.2rem);line-height:.94;margin:0 0 14px;text-transform:uppercase;letter-spacing:.6px}
+    .desc{font-size:clamp(1.05rem,2vw,1.5rem);color:var(--muted);margin:0 0 20px;max-width:720px}
+    .panel{background:linear-gradient(165deg,#0f131a,#0a0d12);padding:24px;border:1px solid #1d2430;border-radius:16px;box-shadow:0 22px 45px rgba(0,0,0,.45)}
+    label{display:block;margin:0 0 12px;font-size:14px;color:#cfd6df} input,select,button{width:100%;padding:12px 13px;background:#070b11;color:#fff;border:1px solid #2a3443;border-radius:10px}
+    button{font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:.7px;transition:.2s transform,.2s opacity}
+    button:hover{transform:translateY(-1px);opacity:.96}.primary{background:#f8fafc;color:#050608;border-color:#f8fafc}
+    .videoBox{background:linear-gradient(180deg,#0c111a,#080c12);padding:12px;border:1px solid #1b2532;border-radius:16px;box-shadow:0 20px 44px rgba(0,0,0,.43)}
+    video{width:100%;display:block;border-radius:12px;min-height:320px;background:#000;object-fit:cover}
+    pre{background:#010913;color:#9bf8ac;padding:12px;border-radius:10px;min-height:120px;border:1px solid #182130}
+    .warn{display:none;color:#ff5d5d;font-weight:800;margin-top:10px;padding:8px 10px;border:1px solid #6e1f1f;background:rgba(255,59,48,.08);border-radius:8px}
+    .footerNote{margin-top:12px;color:#7f8a99;font-size:.9rem}
+    @media(max-width:980px){.hero{grid-template-columns:1fr}.wrap{padding:22px}.nav{padding:14px 22px}.brandLogo{height:44px}}
+  </style>
+</head>
+<body>
+  <div class="nav"><img src="/assets/faircall-logo.svg" alt="Faircall logo" class="brandLogo"/><div class="tag">DISCOVER M</div></div>
+  <div class="stripe"></div>
+  <div class="wrap">
+    <section class="hero">
+      <div>
+        <h1>Ball Line Detector</h1>
+        <p class="desc">A cleaner BMW M-inspired interface for instant line-call checks. Start camera, then run Judge Results.</p>
+        <img src="/assets/bmw-m-design.svg" alt="BMW M design" style="height:60px;margin-bottom:18px;filter:drop-shadow(0 4px 14px rgba(0,0,0,.45));">
+        <div class="panel">
+          <label>Sport<select id="sport"><option>table_tennis</option><option>badminton</option><option>basketball</option><option>tennis</option><option>volleyball</option><option>soccer</option><option>baseball</option><option>pickleball</option><option>squash</option></select></label>
+          <label>Ball Radius (mm)<input id="r_mm" type="number" value="10" min="1" /></label>
+          <button id="startCam">Start Camera</button>
+          <button id="judge" class="primary" style="margin-top:8px;">Judge Results</button>
+          <p id="warning" class="warn">Please insert the right photo</p>
+          <pre id="result">Result will appear here...</pre>
+          <div class="footerNote">Tip: keep the ball and line near the center of frame for best results.</div>
+        </div>
+      </div>
+      <div class="videoBox">
+        <video id="camera" autoplay playsinline muted></video>
+        <div class="stripe" style="margin-top:10px;border-radius:999px"></div>
+      </div>
+    </section>
+  </div>
+<script>
+const camera = document.getElementById('camera');
+const warning = document.getElementById('warning');
+const sportMap = { volleyball: 'basketball', soccer: 'basketball', baseball: 'tennis', pickleball: 'table_tennis', squash: 'badminton' };
 
-    <div class="grid">
-      <label>Sport
-        <select id="sport"><option>table_tennis</option><option>badminton</option><option>basketball</option><option>tennis</option></select>
-      </label>
-      <label>Ball radius (mm)<input id="r_mm" type="number" value="10" /></label>
-    </div>
+document.getElementById('startCam').onclick = async () => {
+  warning.style.display = 'none';
+  try { camera.srcObject = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }); }
+  catch (e) { document.getElementById('result').textContent = `Camera error: ${e.message}`; }
+};
 
-    <h3>Camera</h3>
-    <button id="startCam">Start Camera</button>
-    <video id="camera" autoplay playsinline muted></video>
-    <p class="note">This camera preview is for live capture workflow. Ball center and court lines are auto-filled with placeholder values until vision tracking is connected.</p>
-
-    <button id="submit">Judge</button>
-    <pre id="result">Result will appear here...</pre>
-
-    <script>
-      const camera = document.getElementById('camera');
-      document.getElementById('startCam').onclick = async () => {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-          camera.srcObject = stream;
-        } catch (err) {
-          document.getElementById('result').textContent = `Camera error: ${err.message}`;
-        }
-      };
-
-      document.getElementById('submit').onclick = async () => {
-        const payload = {
-          sport: document.getElementById('sport').value,
-          r_mm: Number(document.getElementById('r_mm').value),
-          x: 100,
-          y: 100,
-          lines: [{ x1: 120, y1: 0, x2: 120, y2: 300 }]
-        };
-        const res = await fetch('/api/judge', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(payload)
-        });
-        document.getElementById('result').textContent = JSON.stringify(await res.json(), null, 2);
-      };
-    </script>
-  </body>
+document.getElementById('judge').onclick = async () => {
+  const vw = camera.videoWidth || 640, vh = camera.videoHeight || 360;
+  const selectedSport = sport.value;
+  const apiSport = sportMap[selectedSport] || selectedSport;
+  const payload = {
+    sport: apiSport,
+    r_mm: Number(r_mm.value),
+    x: Math.round(vw * 0.5),
+    y: Math.round(vh * 0.5),
+    lines: [{x1:Math.round(vw*0.5), y1:0, x2:Math.round(vw*0.5), y2:vh}]
+  };
+  const res = await fetch('/api/judge', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+  const data = await res.json();
+  const extra = apiSport !== selectedSport ? { note: `Mapped ${selectedSport} to ${apiSport} decision profile.` } : {};
+  document.getElementById('result').textContent = JSON.stringify({ ...extra, ...data }, null, 2);
+  warning.style.display = data.touched_line ? 'none' : 'block';
+};
+</script>
+</body>
 </html>
