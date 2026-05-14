@@ -51,6 +51,25 @@
         try { camera.srcObject = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }); }
         catch (e) { document.getElementById('result').textContent = `Camera error: ${e.message}`; }
       };
+      document.getElementById('capture').onclick = () => draw();
+      document.getElementById('markBall').onclick = () => state.mode = 'ball';
+      document.getElementById('markLine').onclick = () => state.mode = 'line';
+
+      canvas.addEventListener('click', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = Math.round((e.clientX - rect.left) * (canvas.width / rect.width));
+        const y = Math.round((e.clientY - rect.top) * (canvas.height / rect.height));
+        if (state.mode === 'ball') {
+          state.ball = { x, y };
+        } else if (state.mode === 'line') {
+          if (!state.pendingLinePoint) state.pendingLinePoint = { x, y };
+          else {
+            state.lines.push({ x1: state.pendingLinePoint.x, y1: state.pendingLinePoint.y, x2: x, y2: y });
+            state.pendingLinePoint = null;
+          }
+        }
+        draw();
+      });
 
       document.getElementById('judge').onclick = async () => {
         const vw = camera.videoWidth || 640, vh = camera.videoHeight || 360;
@@ -61,6 +80,8 @@
         const res = await fetch('/api/judge', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
         document.getElementById('result').textContent = JSON.stringify(await res.json(), null, 2);
       };
+
+      setInterval(() => { if (camera.srcObject) draw(); }, 400);
     </script>
   </body>
 </html>
