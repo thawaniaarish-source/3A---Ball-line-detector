@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120" role="img" aria-label="BMW M inspired stripe mark">
+  <rect width="420" height="120" fill="none"/>
+  <polygon points="20,100 80,20 135,20 75,100" fill="#7BD0F6"/>
+  <polygon points="95,100 155,20 210,20 150,100" fill="#2E5CAA"/>
+  <polygon points="170,100 230,20 320,20 260,100" fill="#E83059"/>
+  <text x="330" y="96" font-family="Arial Black,Arial,sans-serif" font-size="88" font-style="italic" fill="#111">M</text>
+</svg>
