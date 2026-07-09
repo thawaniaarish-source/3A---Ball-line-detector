@@ -62,31 +62,42 @@
 <script>
 const camera = document.getElementById('camera');
 const warning = document.getElementById('warning');
+const result = document.getElementById('result');
+const sportSelect = document.getElementById('sport');
+const radiusInput = document.getElementById('r_mm');
 const sportMap = { volleyball: 'basketball', soccer: 'basketball', baseball: 'tennis', pickleball: 'table_tennis', squash: 'badminton' };
 
 document.getElementById('startCam').onclick = async () => {
   warning.style.display = 'none';
   try { camera.srcObject = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }); }
-  catch (e) { document.getElementById('result').textContent = `Camera error: ${e.message}`; }
+  catch (e) { result.textContent = `Camera error: ${e.message}`; }
 };
 
 document.getElementById('judge').onclick = async () => {
-  const vw = camera.videoWidth || 640, vh = camera.videoHeight || 360;
-  const selectedSport = sport.value;
-  const apiSport = sportMap[selectedSport] || selectedSport;
-  const payload = {
-    sport: apiSport,
-    r_mm: Number(r_mm.value),
-    x: Math.round(vw * 0.5),
-    y: Math.round(vh * 0.5),
-    lines: [{x1:Math.round(vw*0.5), y1:0, x2:Math.round(vw*0.5), y2:vh}]
-  };
-  const res = await fetch('/api/judge', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
-  const data = await res.json();
-  const extra = apiSport !== selectedSport ? { note: `Mapped ${selectedSport} to ${apiSport} decision profile.` } : {};
-  document.getElementById('result').textContent = JSON.stringify({ ...extra, ...data }, null, 2);
-  const validHit = data && data.touched_line === true;
-  warning.style.display = validHit ? 'none' : 'block';
+  result.textContent = 'Judging current frame...';
+  warning.style.display = 'none';
+
+  try {
+    const vw = camera.videoWidth || 640, vh = camera.videoHeight || 360;
+    const selectedSport = sportSelect.value;
+    const apiSport = sportMap[selectedSport] || selectedSport;
+    const payload = {
+      sport: apiSport,
+      r_mm: Number(radiusInput.value),
+      x: Math.round(vw * 0.5),
+      y: Math.round(vh * 0.5),
+      lines: [{x1:Math.round(vw*0.5), y1:0, x2:Math.round(vw*0.5), y2:vh}]
+    };
+    const res = await fetch('/api/judge', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+    const data = await res.json();
+    const extra = apiSport !== selectedSport ? { note: `Mapped ${selectedSport} to ${apiSport} decision profile.` } : {};
+    result.textContent = JSON.stringify({ ...extra, ...data }, null, 2);
+    const validHit = data && data.touched_line === true;
+    warning.style.display = validHit ? 'none' : 'block';
+  } catch (e) {
+    result.textContent = `Judge error: ${e.message}`;
+    warning.style.display = 'block';
+  }
 };
 </script>
 </body>
