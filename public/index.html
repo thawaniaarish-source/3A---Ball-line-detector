@@ -26,6 +26,7 @@
   </style>
 </head>
 <body>
+  <!-- Conflict-free UI version: keep this file synced with public/index.html. -->
   <div class="nav"><svg class="brandLogo" viewBox="0 0 420 120" role="img" aria-label="logo" xmlns="http://www.w3.org/2000/svg">
   <g transform="translate(8,10)">
     <polygon points="52,0 98,26 98,78 52,104 6,78 6,26" fill="#93d045"/>
@@ -33,13 +34,8 @@
     <path d="M36 45c10 4 19 0 24-8" stroke="#2e236d" stroke-width="7" fill="none" stroke-linecap="round"/>
     <path d="M44 60c10-7 22-7 31-2" stroke="#2e236d" stroke-width="7" fill="none" stroke-linecap="round"/>
   </g>
-<<<<<<< codex/build-app-to-detect-ball-line-hits-q1l7qz
-  <text x="116" y="62" font-family="Arial Black,Arial,sans-serif" font-size="36" fill="#93d045" letter-spacing="0.5">FAIRCALL.PRO</text>
-  <text x="118" y="92" font-family="Arial, sans-serif" font-size="16" fill="#93d045" letter-spacing="8">SINCE 2026</text>
-=======
-  <text x="122" y="66" font-family="Arial Black,Arial,sans-serif" font-size="46" fill="#93d045" letter-spacing="1">FAIRCALL.PRO</text>
-  <text x="124" y="98" font-family="Arial, sans-serif" font-size="20" fill="#93d045" letter-spacing="8">SINCE 2026</text>
->>>>>>> main
+<text x="116" y="62" font-family="Arial Black,Arial,sans-serif" font-size="36" fill="#93d045" letter-spacing="0.5">FAIRCALL.PRO</text>
+<text x="118" y="92" font-family="Arial, sans-serif" font-size="16" fill="#93d045" letter-spacing="8">SINCE 2026</text>
 </svg><div class="tag">DISCOVER M</div></div>
   <div class="stripe"></div>
   <div class="wrap">
@@ -53,7 +49,7 @@
           <label>Ball Radius (mm)<input id="r_mm" type="number" value="10" min="1" /></label>
           <button id="startCam">Start Camera</button>
           <button id="judge" class="primary" style="margin-top:8px;">Judge Results</button>
-          <p id="warning" class="warn">Please insert the right photo</p>
+          <p id="warning" class="warn">Please show the right photo</p>
           <pre id="result">Result will appear here...</pre>
           <div class="footerNote">Tip: keep the ball and line near the center of frame for best results.</div>
         </div>
@@ -67,30 +63,42 @@
 <script>
 const camera = document.getElementById('camera');
 const warning = document.getElementById('warning');
+const result = document.getElementById('result');
+const sportSelect = document.getElementById('sport');
+const radiusInput = document.getElementById('r_mm');
 const sportMap = { volleyball: 'basketball', soccer: 'basketball', baseball: 'tennis', pickleball: 'table_tennis', squash: 'badminton' };
 
 document.getElementById('startCam').onclick = async () => {
   warning.style.display = 'none';
   try { camera.srcObject = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }); }
-  catch (e) { document.getElementById('result').textContent = `Camera error: ${e.message}`; }
+  catch (e) { result.textContent = `Camera error: ${e.message}`; }
 };
 
 document.getElementById('judge').onclick = async () => {
-  const vw = camera.videoWidth || 640, vh = camera.videoHeight || 360;
-  const selectedSport = sport.value;
-  const apiSport = sportMap[selectedSport] || selectedSport;
-  const payload = {
-    sport: apiSport,
-    r_mm: Number(r_mm.value),
-    x: Math.round(vw * 0.5),
-    y: Math.round(vh * 0.5),
-    lines: [{x1:Math.round(vw*0.5), y1:0, x2:Math.round(vw*0.5), y2:vh}]
-  };
-  const res = await fetch('/api/judge', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
-  const data = await res.json();
-  const extra = apiSport !== selectedSport ? { note: `Mapped ${selectedSport} to ${apiSport} decision profile.` } : {};
-  document.getElementById('result').textContent = JSON.stringify({ ...extra, ...data }, null, 2);
-  warning.style.display = data.touched_line ? 'none' : 'block';
+  result.textContent = 'Judging current frame...';
+  warning.style.display = 'none';
+
+  try {
+    const vw = camera.videoWidth || 640, vh = camera.videoHeight || 360;
+    const selectedSport = sportSelect.value;
+    const apiSport = sportMap[selectedSport] || selectedSport;
+    const payload = {
+      sport: apiSport,
+      r_mm: Number(radiusInput.value),
+      x: Math.round(vw * 0.5),
+      y: Math.round(vh * 0.5),
+      lines: [{x1:Math.round(vw*0.5), y1:0, x2:Math.round(vw*0.5), y2:vh}]
+    };
+    const res = await fetch('/api/judge', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+    const data = await res.json();
+    const extra = apiSport !== selectedSport ? { note: `Mapped ${selectedSport} to ${apiSport} decision profile.` } : {};
+    result.textContent = JSON.stringify({ ...extra, ...data }, null, 2);
+    const validHit = data && data.touched_line === true;
+    warning.style.display = validHit ? 'none' : 'block';
+  } catch (e) {
+    result.textContent = `Judge error: ${e.message}`;
+    warning.style.display = 'block';
+  }
 };
 </script>
 </body>
